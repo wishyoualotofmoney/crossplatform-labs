@@ -13,11 +13,14 @@ namespace lab1_gazizov.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {
+            // Проверка правильности учетных данных пользователя
             if (model.Username == "admin" && model.Password == "admin")
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
+                // Определение секретного ключа для создания токена
                 var key = Encoding.UTF8.GetBytes("ThisIsASecretKeyForJWT1234567890123456");
+                var tokenHandler = new JwtSecurityTokenHandler();
 
+                // Описание параметров токена (аудитория и эмитент должны совпадать с конфигурацией в Program.cs)
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new[]
@@ -26,15 +29,22 @@ namespace lab1_gazizov.Controllers
                         new Claim(ClaimTypes.Role, "Admin")
                     }),
                     Expires = DateTime.UtcNow.AddHours(1),
+                    Issuer = "BarbershopAPI", // Совпадает с Issuer в JwtBearerOptions
+                    Audience = "BarbershopAPI", // Совпадает с Audience в JwtBearerOptions
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
+
+                // Создание токена
                 var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                // Возврат токена клиенту
                 return Ok(new { Token = tokenHandler.WriteToken(token) });
             }
             return Unauthorized();
         }
     }
 
+    // Модель для получения данных логина
     public class LoginModel
     {
         public string Username { get; set; }

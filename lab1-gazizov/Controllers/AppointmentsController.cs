@@ -1,10 +1,9 @@
-﻿
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using lab1_gazizov.Data;
 using lab1_gazizov.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Authorization;
 
 namespace lab1_gazizov.Controllers
 {
@@ -13,71 +12,89 @@ namespace lab1_gazizov.Controllers
     [ApiController]
     public class AppointmentsController : ControllerBase
     {
-        private static List<Appointment> appointments = new List<Appointment>();
-        private static List<Barber> barbers = BarbersController.barbers;
-        private static List<Customer> customers = CustomersController.customers;
+        private readonly BarbershopContext _context;
 
+        // Конструктор для получения контекста базы данных
+        public AppointmentsController(BarbershopContext context)
+        {
+            _context = context;
+        }
+
+        // Получить все записи
         [HttpGet]
         public ActionResult<IEnumerable<Appointment>> GetAppointments()
         {
-            return appointments;
+            return _context.Appointments.ToList();
         }
 
+        // Получить запись по ID
         [HttpGet("{id}")]
         public ActionResult<Appointment> GetAppointment(int id)
         {
-            var appointment = appointments.FirstOrDefault(a => a.Id == id);
+            var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id);
             if (appointment == null)
                 return NotFound();
             return appointment;
         }
 
+        // Создать новую запись
         [HttpPost]
         public ActionResult<Appointment> CreateAppointment(Appointment appointment)
         {
-            var barber = barbers.FirstOrDefault(b => b.Id == appointment.BarberId);
+            // Проверяем, существует ли парикмахер с указанным ID
+            var barber = _context.Barbers.FirstOrDefault(b => b.Id == appointment.BarberId);
             if (barber == null)
                 return NotFound("Парикмахер не найден.");
 
-            var customer = customers.FirstOrDefault(c => c.Id == appointment.CustomerId);
+            // Проверяем, существует ли клиент с указанным ID
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == appointment.CustomerId);
             if (customer == null)
                 return NotFound("Клиент не найден.");
 
+            // Проверяем, доступен ли парикмахер в указанное время
             if (!barber.IsAvailable(appointment.AppointmentTime))
                 return BadRequest("Парикмахер недоступен в выбранное время.");
 
-            appointment.Id = appointments.Count + 1;
-            appointments.Add(appointment);
+            _context.Appointments.Add(appointment);
+            _context.SaveChanges();
+
             return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, appointment);
         }
 
+        // Обновить существующую запись
         [HttpPut("{id}")]
         public IActionResult UpdateAppointment(int id, Appointment appointment)
         {
-            var existingAppointment = appointments.FirstOrDefault(a => a.Id == id);
+            var existingAppointment = _context.Appointments.FirstOrDefault(a => a.Id == id);
             if (existingAppointment == null)
                 return NotFound();
 
-            var barber = barbers.FirstOrDefault(b => b.Id == appointment.BarberId);
+            var barber = _context.Barbers.FirstOrDefault(b => b.Id == appointment.BarberId);
             if (barber == null)
                 return NotFound("Парикмахер не найден.");
 
             if (!barber.IsAvailable(appointment.AppointmentTime))
                 return BadRequest("Парикмахер недоступен в выбранное время.");
 
+            // Обновляем данные существующей записи
             existingAppointment.AppointmentTime = appointment.AppointmentTime;
             existingAppointment.BarberId = appointment.BarberId;
             existingAppointment.CustomerId = appointment.CustomerId;
+
+            _context.SaveChanges();
             return NoContent();
         }
 
+        // Удалить запись по ID
         [HttpDelete("{id}")]
         public IActionResult DeleteAppointment(int id)
         {
-            var appointment = appointments.FirstOrDefault(a => a.Id == id);
+            var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id);
             if (appointment == null)
                 return NotFound();
-            appointments.Remove(appointment);
+
+            _context.Appointments.Remove(appointment);
+            _context.SaveChanges();
             return NoContent();
         }
     }

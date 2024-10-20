@@ -25,8 +25,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = "yourdomain.com",
-        ValidAudience = "yourdomain.com",
+        ValidIssuer = "BarbershopAPI",
+        ValidAudience = "BarbershopAPI",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThisIsASecretKeyForJWT1234567890123456")) // Более длинный ключ
     };
 });
