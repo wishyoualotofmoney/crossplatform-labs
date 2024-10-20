@@ -1,4 +1,5 @@
-﻿using lab1_gazizov.Models;
+﻿using lab1_gazizov.Data;
+using lab1_gazizov.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +10,24 @@ namespace lab1_gazizov.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        public static List<Customer> customers = new List<Customer>();
+        private readonly BarbershopContext _context;
+
+        // Конструктор для получения контекста базы данных
+        public CustomersController(BarbershopContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public ActionResult<IEnumerable<Customer>> GetCustomers()
         {
-            return customers;
+            return _context.Customers.ToList();
         }
 
         [HttpGet("{id}")]
         public ActionResult<Customer> GetCustomer(int id)
         {
-            var customer = customers.FirstOrDefault(c => c.Id == id);
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
             if (customer == null)
                 return NotFound();
             return customer;
@@ -29,29 +36,31 @@ namespace lab1_gazizov.Controllers
         [HttpPost]
         public ActionResult<Customer> CreateCustomer(Customer customer)
         {
-            customer.Id = customers.Count + 1;
-            customers.Add(customer);
+            _context.Customers.Add(customer);
+            _context.SaveChanges();
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateCustomer(int id, Customer customer)
         {
-            var existingCustomer = customers.FirstOrDefault(c => c.Id == id);
+            var existingCustomer = _context.Customers.FirstOrDefault(c => c.Id == id);
             if (existingCustomer == null)
                 return NotFound();
             existingCustomer.Name = customer.Name;
             existingCustomer.PreferredStyle = customer.PreferredStyle;
+            _context.SaveChanges();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteCustomer(int id)
         {
-            var customer = customers.FirstOrDefault(c => c.Id == id);
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == id);
             if (customer == null)
                 return NotFound();
-            customers.Remove(customer);
+            _context.Customers.Remove(customer);
+            _context.SaveChanges();
             return NoContent();
         }
     }

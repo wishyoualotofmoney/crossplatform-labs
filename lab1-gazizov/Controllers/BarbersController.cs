@@ -1,8 +1,8 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using lab1_gazizov.Models;
+using lab1_gazizov.Data;
 using Microsoft.AspNetCore.Authorization;
 
 namespace lab1_gazizov.Controllers
@@ -12,18 +12,24 @@ namespace lab1_gazizov.Controllers
     [ApiController]
     public class BarbersController : ControllerBase
     {
-        public static List<Barber> barbers = new List<Barber>();
+        private readonly BarbershopContext _context;
+
+        // Конструктор для получения контекста базы данных
+        public BarbersController(BarbershopContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public ActionResult<IEnumerable<Barber>> GetBarbers()
         {
-            return barbers;
+            return _context.Barbers.ToList();
         }
 
         [HttpGet("{id}")]
         public ActionResult<Barber> GetBarber(int id)
         {
-            var barber = barbers.FirstOrDefault(b => b.Id == id);
+            var barber = _context.Barbers.FirstOrDefault(b => b.Id == id);
             if (barber == null)
                 return NotFound();
             return barber;
@@ -32,29 +38,34 @@ namespace lab1_gazizov.Controllers
         [HttpPost]
         public ActionResult<Barber> CreateBarber(Barber barber)
         {
-            barber.Id = barbers.Count + 1;
-            barbers.Add(barber);
+            _context.Barbers.Add(barber);
+            _context.SaveChanges();
             return CreatedAtAction(nameof(GetBarber), new { id = barber.Id }, barber);
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateBarber(int id, Barber barber)
         {
-            var existingBarber = barbers.FirstOrDefault(b => b.Id == id);
+            var existingBarber = _context.Barbers.FirstOrDefault(b => b.Id == id);
             if (existingBarber == null)
                 return NotFound();
+
             existingBarber.Name = barber.Name;
             existingBarber.ExperienceLevel = barber.ExperienceLevel;
+            _context.SaveChanges();
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult DeleteBarber(int id)
         {
-            var barber = barbers.FirstOrDefault(b => b.Id == id);
+            var barber = _context.Barbers.FirstOrDefault(b => b.Id == id);
             if (barber == null)
                 return NotFound();
-            barbers.Remove(barber);
+
+            _context.Barbers.Remove(barber);
+            _context.SaveChanges();
             return NoContent();
         }
     }

@@ -7,9 +7,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем строку подключения из appsettings.json и регистрируем контекст базы данных
+// Добавляем строку подключения из appsettings.json и регистрируем контекст базы данных с поддержкой повторных попыток
 builder.Services.AddDbContext<BarbershopContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+    sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
 
 // Добавляем аутентификацию с JWT токенами
 builder.Services.AddAuthentication(options =>

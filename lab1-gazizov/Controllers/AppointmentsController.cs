@@ -82,7 +82,7 @@ namespace lab1_gazizov.Controllers
             existingAppointment.CustomerId = appointment.CustomerId;
 
             _context.SaveChanges();
-            return NoContent();
+            return Ok(existingAppointment);
         }
 
         // Удалить запись по ID

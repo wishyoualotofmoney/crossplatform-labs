@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>lab1_gazizov</RootNamespace>
+    <UserSecretsId>609fef67-25b1-43ac-a931-d20d1ca98ae1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
