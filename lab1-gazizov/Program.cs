@@ -1,12 +1,38 @@
 using lab1_gazizov.Data;  // Подключаем пространство имен, где находится ваш контекст данных
+using Microsoft.AspNetCore.Authentication.JwtBearer;  // Для работы с JWT
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;  // Для настройки токенов
 using Microsoft.OpenApi.Models;  // Подключаем пространство имен для Swagger
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Добавляем строку подключения из appsettings.json и регистрируем контекст базы данных
 builder.Services.AddDbContext<BarbershopContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Добавляем аутентификацию с JWT токенами
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = "yourdomain.com",
+        ValidAudience = "yourdomain.com",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSecretKeyGoesHere"))
+    };
+});
+
+// Добавляем авторизацию
+builder.Services.AddAuthorization();
 
 // Добавляем Swagger для генерации документации API
 builder.Services.AddEndpointsApiExplorer();
@@ -18,9 +44,34 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API для управления барбершопом, включает CRUD операции для парикмахеров, клиентов и записей"
     });
+
+    // Настраиваем авторизацию для Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Введите токен в формате: Bearer {token}",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
 });
 
-// Add services to the container.
+// Добавляем контроллеры и представления
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -39,7 +90,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -48,7 +98,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthorization();
+app.UseAuthentication(); // Добавляем использование аутентификации
+app.UseAuthorization();  // Добавляем использование авторизации
 
 app.MapControllerRoute(
     name: "default",

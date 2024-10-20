@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using lab1_gazizov.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace lab1_gazizov.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class BarbersController : ControllerBase
