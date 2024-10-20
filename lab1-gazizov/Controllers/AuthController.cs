@@ -16,7 +16,8 @@ namespace lab1_gazizov.Controllers
             if (model.Username == "admin" && model.Password == "admin")
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes("YourSecretKeyGoesHere");
+                var key = Encoding.UTF8.GetBytes("ThisIsASecretKeyForJWT1234567890123456");
+
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new[]
