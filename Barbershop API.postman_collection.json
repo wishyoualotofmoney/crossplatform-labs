@@ -1,0 +1,95 @@
+{
+	"info": {
+		"_postman_id": "6a012570-bd3c-49b6-8865-7646a35013f6",
+		"name": "Barbershop API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39162326"
+	},
+	"item": [
+		{
+			"name": "Get all customers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7063/api/Customers",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7063",
+					"path": [
+						"api",
+						"Customers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add customer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Иван Иванов\",\r\n  \"preferredStyle\": \"Классический\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7063/api/Customers",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7063",
+					"path": [
+						"api",
+						"Customers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change Customer",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"тамара\",\r\n    \"preferredStyle\": \"Классический\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7063/api/Customers/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7063",
+					"path": [
+						"api",
+						"Customers",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
