@@ -39,6 +39,9 @@ namespace lab1_gazizov.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Appointments");
@@ -47,16 +50,18 @@ namespace lab1_gazizov.Migrations
                         new
                         {
                             Id = 1,
-                            AppointmentTime = new DateTime(2024, 10, 20, 17, 23, 59, 870, DateTimeKind.Local).AddTicks(9713),
+                            AppointmentTime = new DateTime(2024, 11, 10, 17, 35, 40, 511, DateTimeKind.Local).AddTicks(83),
                             BarberId = 1,
-                            CustomerId = 1
+                            CustomerId = 1,
+                            Duration = 0
                         },
                         new
                         {
                             Id = 2,
-                            AppointmentTime = new DateTime(2024, 10, 20, 19, 23, 59, 870, DateTimeKind.Local).AddTicks(9749),
+                            AppointmentTime = new DateTime(2024, 11, 10, 19, 35, 40, 511, DateTimeKind.Local).AddTicks(108),
                             BarberId = 2,
-                            CustomerId = 2
+                            CustomerId = 2,
+                            Duration = 0
                         });
                 });
 

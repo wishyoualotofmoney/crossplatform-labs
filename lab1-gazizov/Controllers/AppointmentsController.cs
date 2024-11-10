@@ -51,10 +51,22 @@ namespace lab1_gazizov.Controllers
             if (customer == null)
                 return NotFound("Клиент не найден.");
 
-            // Проверяем, доступен ли парикмахер в указанное время
-            var overlappingAppointment = _context.Appointments.FirstOrDefault(a => a.BarberId == appointment.BarberId && a.AppointmentTime == appointment.AppointmentTime);
-            if (overlappingAppointment != null)
+            // Проверяем, доступен ли парикмахер в указанное время с учетом длительности
+            var overlappingAppointment = _context.Appointments
+                .Where(a => a.BarberId == appointment.BarberId)
+                .Any(a => a.AppointmentTime < appointment.AppointmentTime.AddMinutes(appointment.Duration) &&
+                          appointment.AppointmentTime < a.AppointmentTime.AddMinutes(a.Duration));
+
+            if (overlappingAppointment)
+            {
                 return BadRequest("Парикмахер уже занят в выбранное время.");
+            }
+
+            // Добавляем длительность записи (например, 30 или 60 минут)
+            if (appointment.Duration != 30 && appointment.Duration != 60)
+            {
+                return BadRequest("Длительность записи должна быть 30 или 60 минут.");
+            }
 
             _context.Appointments.Add(appointment);
             _context.SaveChanges();
@@ -74,30 +86,45 @@ namespace lab1_gazizov.Controllers
             if (barber == null)
                 return NotFound("Парикмахер не найден.");
 
-            var overlappingAppointment = _context.Appointments.FirstOrDefault(a => a.BarberId == appointment.BarberId && a.AppointmentTime == appointment.AppointmentTime && a.Id != id);
-            if (overlappingAppointment != null)
+            // Проверяем, доступен ли парикмахер в указанное время с учетом длительности
+            var overlappingAppointment = _context.Appointments
+                .Where(a => a.BarberId == appointment.BarberId && a.Id != id)
+                .Any(a => a.AppointmentTime < appointment.AppointmentTime.AddMinutes(appointment.Duration) &&
+                          appointment.AppointmentTime < a.AppointmentTime.AddMinutes(a.Duration));
+
+            if (overlappingAppointment)
+            {
                 return BadRequest("Парикмахер уже занят в выбранное время.");
+            }
 
             // Обновляем данные существующей записи
             existingAppointment.AppointmentTime = appointment.AppointmentTime;
             existingAppointment.BarberId = appointment.BarberId;
             existingAppointment.CustomerId = appointment.CustomerId;
+            existingAppointment.Duration = appointment.Duration;
 
             _context.SaveChanges();
             return Ok(existingAppointment);
         }
+    
 
-        // Удалить запись по ID
-        [HttpDelete("{id}")]
-        public IActionResult DeleteAppointment(int id)
-        {
-            var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id);
-            if (appointment == null)
-                return NotFound();
 
-            _context.Appointments.Remove(appointment);
-            _context.SaveChanges();
-            return NoContent();
-        }
-    }
+
+
+// Удалить запись по ID
+            [HttpDelete("{id}")]
+                    public IActionResult DeleteAppointment(int id)
+                    {
+                        var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id);
+                        if (appointment == null)
+                            return NotFound();
+
+                        _context.Appointments.Remove(appointment);
+                        _context.SaveChanges();
+                        return NoContent();
+                    }
+                }
 }
+
+
+

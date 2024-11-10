@@ -12,7 +12,7 @@ using lab1_gazizov.Data;
 namespace lab1_gazizov.Migrations
 {
     [DbContext(typeof(BarbershopContext))]
-    [Migration("20241020130941_InitialCreate")]
+    [Migration("20241110133541_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -42,9 +42,30 @@ namespace lab1_gazizov.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Appointments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AppointmentTime = new DateTime(2024, 11, 10, 17, 35, 40, 511, DateTimeKind.Local).AddTicks(83),
+                            BarberId = 1,
+                            CustomerId = 1,
+                            Duration = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AppointmentTime = new DateTime(2024, 11, 10, 19, 35, 40, 511, DateTimeKind.Local).AddTicks(108),
+                            BarberId = 2,
+                            CustomerId = 2,
+                            Duration = 0
+                        });
                 });
 
             modelBuilder.Entity("lab1_gazizov.Models.Barber", b =>
@@ -65,6 +86,20 @@ namespace lab1_gazizov.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Barbers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ExperienceLevel = 5,
+                            Name = "Иван Иванов"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ExperienceLevel = 3,
+                            Name = "Петр Петров"
+                        });
                 });
 
             modelBuilder.Entity("lab1_gazizov.Models.Customer", b =>
@@ -86,6 +121,20 @@ namespace lab1_gazizov.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customers");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Алексей Смирнов",
+                            PreferredStyle = "Классический"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Мария Сидорова",
+                            PreferredStyle = "Модерн"
+                        });
                 });
 #pragma warning restore 612, 618
         }

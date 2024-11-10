@@ -1,7 +1,4 @@
-﻿using lab1_gazizov.Models;
-using System;
-
-namespace lab1_gazizov.Models
+﻿namespace lab1_gazizov.Models
 {
     public class Appointment
     {
@@ -9,18 +6,6 @@ namespace lab1_gazizov.Models
         public int BarberId { get; set; }
         public int CustomerId { get; set; }
         public DateTime AppointmentTime { get; set; }
-
-        // Метод бизнес-логики: Переназначение времени записи
-        public void Reschedule(DateTime newTime, Barber barber)
-        {
-            if (barber.IsAvailable(newTime))
-            {
-                AppointmentTime = newTime;
-            }
-            else
-            {
-                throw new Exception("Парикмахер недоступен в новое время.");
-            }
-        }
+        public int Duration { get; set; } // Длительность записи в минутах (30 или 60 минут)
     }
 }
