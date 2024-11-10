@@ -52,8 +52,9 @@ namespace lab1_gazizov.Controllers
                 return NotFound("Клиент не найден.");
 
             // Проверяем, доступен ли парикмахер в указанное время
-            if (!barber.IsAvailable(appointment.AppointmentTime))
-                return BadRequest("Парикмахер недоступен в выбранное время.");
+            var overlappingAppointment = _context.Appointments.FirstOrDefault(a => a.BarberId == appointment.BarberId && a.AppointmentTime == appointment.AppointmentTime);
+            if (overlappingAppointment != null)
+                return BadRequest("Парикмахер уже занят в выбранное время.");
 
             _context.Appointments.Add(appointment);
             _context.SaveChanges();
@@ -73,8 +74,9 @@ namespace lab1_gazizov.Controllers
             if (barber == null)
                 return NotFound("Парикмахер не найден.");
 
-            if (!barber.IsAvailable(appointment.AppointmentTime))
-                return BadRequest("Парикмахер недоступен в выбранное время.");
+            var overlappingAppointment = _context.Appointments.FirstOrDefault(a => a.BarberId == appointment.BarberId && a.AppointmentTime == appointment.AppointmentTime && a.Id != id);
+            if (overlappingAppointment != null)
+                return BadRequest("Парикмахер уже занят в выбранное время.");
 
             // Обновляем данные существующей записи
             existingAppointment.AppointmentTime = appointment.AppointmentTime;
