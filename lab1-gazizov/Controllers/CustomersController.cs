@@ -11,8 +11,6 @@ namespace lab1_gazizov.Controllers
     public class CustomersController : ControllerBase
     {
         private readonly BarbershopContext _context;
-
-        // Конструктор для получения контекста базы данных
         public CustomersController(BarbershopContext context)
         {
             _context = context;

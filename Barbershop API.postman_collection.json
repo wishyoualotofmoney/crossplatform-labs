@@ -90,6 +90,58 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Count appoitments",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwibmJmIjoxNzMxOTI4NjA0LCJleHAiOjE3MzE5MzIyMDQsImlhdCI6MTczMTkyODYwNCwiaXNzIjoiQmFyYmVyc2hvcEFQSSIsImF1ZCI6IkJhcmJlcnNob3BBUEkifQ.gyQjbgzfIo0fy76Z2IfP-ubiyQmp7hvU0rm7EqfWseM",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:7063/api/Appointments/customer/5/count",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7063",
+					"path": [
+						"api",
+						"Appointments",
+						"customer",
+						"5",
+						"count"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

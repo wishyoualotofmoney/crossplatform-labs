@@ -4,6 +4,7 @@ using lab1_gazizov.Data;
 using lab1_gazizov.Models;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace lab1_gazizov.Controllers
 {
@@ -13,8 +14,6 @@ namespace lab1_gazizov.Controllers
     public class AppointmentsController : ControllerBase
     {
         private readonly BarbershopContext _context;
-
-        // Конструктор для получения контекста базы данных
         public AppointmentsController(BarbershopContext context)
         {
             _context = context;
@@ -106,24 +105,85 @@ namespace lab1_gazizov.Controllers
             _context.SaveChanges();
             return Ok(existingAppointment);
         }
-    
+
+        // Удалить запись по ID
+        [HttpDelete("{id}")]
+        public IActionResult DeleteAppointment(int id)
+        {
+            var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id);
+            if (appointment == null)
+                return NotFound();
+
+            _context.Appointments.Remove(appointment);
+            _context.SaveChanges();
+            return NoContent();
+        }
+
+        [HttpGet("customer/{customerId}/count")]
+        public ActionResult<object> GetAppointmentCountForCustomer(int customerId)
+        {
+            // Находим клиента по ID
+            var customer = _context.Customers.FirstOrDefault(c => c.Id == customerId);
+            if (customer == null)
+            {
+                return NotFound("Клиент не найден.");
+            }
+
+            // Подсчитываем количество записей для данного клиента
+            var appointmentCount = _context.Appointments
+                .Where(a => a.CustomerId == customerId)
+                .Count();
+
+            // Создаем объект с информацией о клиенте и количестве записей
+            var result = new
+            {
+                CustomerName = customer.Name,
+                AppointmentCount = appointmentCount
+            };
+
+            return Ok(result);
+        }
 
 
 
+        [HttpGet("barber/{barberId}/weekly-appointments")]
+        public ActionResult<object> GetWeeklyAppointmentsForBarber(int barberId)
+        {
+            // Находим барбера по ID
+            var barber = _context.Barbers.FirstOrDefault(b => b.Id == barberId);
+            if (barber == null)
+            {
+                return NotFound("Парикмахер не найден.");
+            }
 
-// Удалить запись по ID
-            [HttpDelete("{id}")]
-                    public IActionResult DeleteAppointment(int id)
-                    {
-                        var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id);
-                        if (appointment == null)
-                            return NotFound();
+            // Определяем текущую дату и дату через 7 дней
+            var today = DateTime.Now;
+            var nextWeek = today.AddDays(7);
 
-                        _context.Appointments.Remove(appointment);
-                        _context.SaveChanges();
-                        return NoContent();
-                    }
-                }
+            // Получаем все записи для данного барбера на следующую неделю
+            var weeklyAppointments = _context.Appointments
+            .Where(a => a.BarberId == barberId && a.AppointmentTime >= today && a.AppointmentTime <= nextWeek)
+            .ToList()
+            .Select(a => new
+            {
+                a.Id,
+                a.AppointmentTime,
+                a.Duration,
+                CustomerName = _context.Customers.FirstOrDefault(c => c.Id == a.CustomerId)?.Name
+            })
+            .ToList();
+
+            // Создаем объект с информацией о барбере и его записях
+            var result = new
+            {
+                BarberName = barber.Name,
+                WeeklyAppointments = weeklyAppointments
+            };
+
+            return Ok(result);
+        }
+    }
+
 }
 
 
