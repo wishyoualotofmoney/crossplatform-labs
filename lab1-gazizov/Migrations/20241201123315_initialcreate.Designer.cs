@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using lab1_gazizov.Data;
 
@@ -11,9 +12,11 @@ using lab1_gazizov.Data;
 namespace lab1_gazizov.Migrations
 {
     [DbContext(typeof(BarbershopContext))]
-    partial class BarbershopContextModelSnapshot : ModelSnapshot
+    [Migration("20241201123315_initialcreate")]
+    partial class initialcreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

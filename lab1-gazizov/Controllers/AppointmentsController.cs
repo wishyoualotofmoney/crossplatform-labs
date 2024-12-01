@@ -18,60 +18,74 @@ namespace lab1_gazizov.Controllers
         {
             _context = context;
         }
-
         // Получить все записи
         [HttpGet]
         public ActionResult<IEnumerable<Appointment>> GetAppointments()
         {
-            return _context.Appointments.ToList();
+            var appointments = _context.Appointments
+                .Include(a => a.Barber)   // Жадная загрузка данных о парикмахере
+                .Include(a => a.Customer) // Жадная загрузка данных о клиенте
+                .Include(a => a.Service)  // Жадная загрузка данных об услуге
+                .ToList();
+
+            return Ok(appointments);
         }
 
         // Получить запись по ID
         [HttpGet("{id}")]
         public ActionResult<Appointment> GetAppointment(int id)
         {
-            var appointment = _context.Appointments.FirstOrDefault(a => a.Id == id);
+            var appointment = _context.Appointments
+                .Include(a => a.Barber)   // Жадная загрузка данных о парикмахере
+                .Include(a => a.Customer) // Жадная загрузка данных о клиенте
+                .Include(a => a.Service)  // Жадная загрузка данных об услуге
+                .FirstOrDefault(a => a.Id == id);
+
             if (appointment == null)
+            {
                 return NotFound();
-            return appointment;
+            }
+
+            return Ok(appointment);
         }
 
+
+        // Создать новую запись
         // Создать новую запись
         [HttpPost]
         public ActionResult<Appointment> CreateAppointment(Appointment appointment)
         {
-            // Проверяем, существует ли парикмахер с указанным ID
             var barber = _context.Barbers.FirstOrDefault(b => b.Id == appointment.BarberId);
             if (barber == null)
                 return NotFound("Парикмахер не найден.");
 
-            // Проверяем, существует ли клиент с указанным ID
             var customer = _context.Customers.FirstOrDefault(c => c.Id == appointment.CustomerId);
             if (customer == null)
                 return NotFound("Клиент не найден.");
 
-            // Проверяем, доступен ли парикмахер в указанное время с учетом длительности
+            var service = _context.Services.FirstOrDefault(s => s.Id == appointment.ServiceId);
+            if (service == null)
+                return NotFound("Услуга не найдена.");
+
+            // Проверяем, доступен ли парикмахер в указанное время с учетом длительности услуги
             var overlappingAppointment = _context.Appointments
                 .Where(a => a.BarberId == appointment.BarberId)
-                .Any(a => a.AppointmentTime < appointment.AppointmentTime.AddMinutes(appointment.Duration) &&
-                          appointment.AppointmentTime < a.AppointmentTime.AddMinutes(a.Duration));
+                .Any(a => a.AppointmentTime < appointment.AppointmentTime.AddMinutes(service.Duration) &&
+                          appointment.AppointmentTime < a.AppointmentTime.AddMinutes(service.Duration));
 
             if (overlappingAppointment)
             {
                 return BadRequest("Парикмахер уже занят в выбранное время.");
             }
 
-            // Добавляем длительность записи (например, 30 или 60 минут)
-            if (appointment.Duration != 30 && appointment.Duration != 60)
-            {
-                return BadRequest("Длительность записи должна быть 30 или 60 минут.");
-            }
+            appointment.Duration = service.Duration; // Устанавливаем длительность на основе выбранной услуги
 
             _context.Appointments.Add(appointment);
             _context.SaveChanges();
 
             return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, appointment);
         }
+
 
         // Обновить существующую запись
         [HttpPut("{id}")]
@@ -85,26 +99,29 @@ namespace lab1_gazizov.Controllers
             if (barber == null)
                 return NotFound("Парикмахер не найден.");
 
-            // Проверяем, доступен ли парикмахер в указанное время с учетом длительности
+            var service = _context.Services.FirstOrDefault(s => s.Id == appointment.ServiceId);
+            if (service == null)
+                return NotFound("Услуга не найдена.");
+
             var overlappingAppointment = _context.Appointments
                 .Where(a => a.BarberId == appointment.BarberId && a.Id != id)
-                .Any(a => a.AppointmentTime < appointment.AppointmentTime.AddMinutes(appointment.Duration) &&
-                          appointment.AppointmentTime < a.AppointmentTime.AddMinutes(a.Duration));
+                .Any(a => a.AppointmentTime < appointment.AppointmentTime.AddMinutes(service.Duration) &&
+                          appointment.AppointmentTime < a.AppointmentTime.AddMinutes(a.Service.Duration));
 
             if (overlappingAppointment)
             {
                 return BadRequest("Парикмахер уже занят в выбранное время.");
             }
 
-            // Обновляем данные существующей записи
             existingAppointment.AppointmentTime = appointment.AppointmentTime;
             existingAppointment.BarberId = appointment.BarberId;
             existingAppointment.CustomerId = appointment.CustomerId;
-            existingAppointment.Duration = appointment.Duration;
+            existingAppointment.ServiceId = appointment.ServiceId;
 
             _context.SaveChanges();
             return Ok(existingAppointment);
         }
+
 
         // Удалить запись по ID
         [HttpDelete("{id}")]
